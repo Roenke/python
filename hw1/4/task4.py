@@ -1,10 +1,19 @@
 #! /usr/bin/env python3
 
+import random
+
+
+class Node(object):
+    def __init__(self, value, level):
+            self.levels = list([Node] * level)
+            self.value = value
+
 
 class SkipList(object):
 
     def __init__(self):
-        pass
+        self._head = Node(0, 1)
+        self._levels = 1
 
     def insert(self, item):
         """
@@ -14,7 +23,8 @@ class SkipList(object):
         >>> sl.insert(1)
         False
         """
-        pass
+
+
 
     def remove(self, item):
         """
