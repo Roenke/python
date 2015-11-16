@@ -1,8 +1,10 @@
 #! /usr/bin/env python3
 import argparse
 import pickle
+import os
 
 import requests
+import requests.exceptions
 
 
 class Friend:
@@ -25,6 +27,7 @@ class Friend:
 
 
 def load(filename):
+    os.path.isfile(filename)
     file = open(filename, 'rb')
     result = pickle.load(file)
     file.close()
@@ -43,6 +46,9 @@ def pull_friends(user_id):
     response = requests.get('https://api.vk.com/method/friends.get', params=params)
 
     friends = set()
+    json = response.json()
+    if 'error' in json:
+        raise Exception(json['error']['error_msg'])
     for friend in response.json()['response']:
         friends.add(Friend(friend))
 
@@ -63,13 +69,16 @@ def diff_mode_execute(user_id):
     deleted = old_info.difference(actual_friends)
     added = actual_friends.difference(old_info)
 
-    print('New friends:')
-    for new_friend in added:
-        print(new_friend)
-
-    print('\nDeleted friends:')
-    for deleted_friend in deleted:
-        print(deleted_friend)
+    if len(deleted) == 0 and len(added) == 0:
+        print('No changes')
+    elif len(deleted) != 0:
+        print('\nDeleted friends:')
+        for deleted_friend in deleted:
+            print(deleted_friend)
+        if len(added) != 0:
+            print('New friends:')
+            for new_friend in added:
+                print(new_friend)
 
 
 def create_parser():
@@ -85,11 +94,18 @@ def main():
     argv = ['8758515', '-d']  # sys.argv
     parser = create_parser()
 
-    args = parser.parse_args(argv)
-    if args.save:
-        save_mode_execute(args.id)
-    else:
-        diff_mode_execute(args.id)
+    try:
+        args = parser.parse_args(argv)
+        if args.save:
+            save_mode_execute(args.id)
+        else:
+            diff_mode_execute(args.id)
+    except requests.exceptions.RequestException as e:
+        print(e)
+        exit(1)
+    except Exception as e:
+        print(e)
+        exit(1)
 
 
 if __name__ == "__main__":
