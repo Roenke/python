@@ -1,25 +1,70 @@
 #! /usr/bin/env python3
 import argparse
-import sys
-import requests
 import json
 import codecs
-import vk
+import pickle
+
+import requests
 
 
-def save_mode_execute(id):
-    pass
+class Friend:
+    def __init__(self, friend, from_json=True):
+        if from_json:
+            self.__id = friend['uid']
+            self.__first_name = friend['first_name']
+            self.__last_name = friend['last_name']
+
+    def __str__(self):
+        return '%d %s %s' % (self.__id, self.__first_name, self.__last_name)
+
+    def get_id(self):
+        return self.__id
 
 
-def diff_mode_execute(id):
+def load(filename):
+    file = open(filename, 'rb')
+    result = set()
+    while file:
+        result.add(pickle.load(file))
+    return result
+
+
+def save(filename, friends):
+    file = open(filename, 'wb')
+    for friend in friends:
+        pickle.dump(str(friend), file, protocol=pickle.HIGHEST_PROTOCOL)
+    # file.writelines([str(x) for x in sorted(friends, key=lambda x: x.get_id())])
+    file.close()
+
+
+def pull_friends(id):
     params = {'user_id': id,
               'fields': ['first_name', 'last_name']}
     response = requests.get('https://api.vk.com/method/friends.get', params=params)
-    print(response.content)
+    decoded_content = codecs.decode(response.content)
+
+    return json.loads(decoded_content)
+
+
+def save_mode_execute(id):
+    answer = pull_friends(id)
+
+    old_info = load('%s.vk' % id)
+
+    print(old_info)
+
+
+def diff_mode_execute(id):
+    answer = pull_friends(id)
+    friends = set()
+    for friend_raw in answer['response']:
+        friends.add(Friend(friend_raw))
+
+    save('%s.vk' % id, friends)
 
 
 def main():
-    argv = ['8758515', '-d']  #sys.argv
+    argv = ['8758515', '-s']  # sys.argv
     # argv = [8758515, '-s']  #sys.argv
     # argv = [8758515, '-d']  #sys.argv
     parser = argparse.ArgumentParser(description='Enter user id and mode')
@@ -33,6 +78,7 @@ def main():
         save_mode_execute(args.id)
     else:
         diff_mode_execute(args.id)
+
 
 if __name__ == "__main__":
     main()
