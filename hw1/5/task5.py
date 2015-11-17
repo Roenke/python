@@ -9,19 +9,19 @@ import sys
 
 
 def solve(book_name):
-    file = open(book_name, 'r', encoding='utf-8')
     morph = pymorphy2.MorphAnalyzer()
     results = dict()
-    for line in file.readlines():
-        for word in filter(lambda x: x, re.split("[^\wW]", line)):
-            for mean in morph.parse(word):
-                if mean.score >= 0.1 and mean.tag.POS is not None:
-                    pos = mean.tag.POS
-                    if pos not in results:
-                        results[pos] = dict()
-                    if mean.normal_form not in results[pos]:
-                        results[pos][mean.normal_form] = 0
-                    results[pos][mean.normal_form] += 1
+    with open(book_name, 'r', encoding='utf-8') as file:
+        for line in file.readlines():
+            for word in filter(lambda x: x, re.split("[^\wW]", line)):
+                for mean in morph.parse(word):
+                    if mean.score >= 0.1 and mean.tag.POS is not None:
+                        pos = mean.tag.POS
+                        if pos not in results:
+                            results[pos] = dict()
+                        if mean.normal_form not in results[pos]:
+                            results[pos][mean.normal_form] = 0
+                        results[pos][mean.normal_form] += 1
 
     for pos, words in results.items():
         with open('%s.csv' % pos, 'w', newline='') as csv_file:
@@ -31,4 +31,5 @@ def solve(book_name):
 
 
 if __name__ == '__main__':
-    solve(sys.argv[1])
+    # solve(sys.argv[1])
+    solve('decameron_test.txt')

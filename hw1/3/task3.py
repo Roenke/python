@@ -5,6 +5,7 @@ import os
 
 import requests
 import requests.exceptions
+import sys
 
 
 class Friend:
@@ -91,7 +92,7 @@ def create_parser():
 
 
 def main():
-    argv = ['8758515', '-d']  # sys.argv
+    argv = sys.argv
     parser = create_parser()
 
     try:
