@@ -46,22 +46,23 @@ def create_hashes(n, m, matrix):
     return hash_array
 
 
+def eval_hash(x1, x2, y1, y2, hashes):
+    result = hashes[x2][y2]
+    if x1 > 0:
+        result -= hashes[x1 - 1][y2]
+    if y1 > 0:
+        result -= hashes[x2][y1 - 1]
+        if x1 > 0:
+            result += hashes[x1 - 1][y1 - 1]
+    return result
+
+
 def is_sub_matrix_eq(query, hashes):
     if query.h1 != query.h2 or query.w1 != query.w2:
         return 0
 
-    def eval_hash(x1, x2, y1, y2):
-        result = hashes[x2][y2]
-        if x1 > 0:
-            result -= hashes[x1 - 1][y2]
-        if y1 > 0:
-            result -= hashes[x2][y1 - 1]
-            if x1 > 0:
-                result += hashes[x1 - 1][y1 - 1]
-        return result
-
-    h1 = eval_hash(query.i1, query.i1 + query.h1 - 1, query.j1, query.j1 + query.w1 - 1)
-    h2 = eval_hash(query.i2, query.i2 + query.h2 - 1, query.j2, query.j2 + query.w2 - 1)
+    h1 = eval_hash(query.i1, query.i1 + query.h1 - 1, query.j1, query.j1 + query.w1 - 1, hashes)
+    h2 = eval_hash(query.i2, query.i2 + query.h2 - 1, query.j2, query.j2 + query.w2 - 1, hashes)
     if (h1 * pow_p[query.i2] * pow_q[query.j2]) % mod == (h2 * pow_p[query.i1] * pow_q[query.j1]) % mod:
         return 1
 
@@ -69,6 +70,8 @@ def is_sub_matrix_eq(query, hashes):
 
 
 def main():
+    f = open('max_test.in', 'r')
+    sys.stdin = f
     n, m = (int(x) for x in sys.stdin.readline().split())
 
     matrix = list()
@@ -76,15 +79,19 @@ def main():
     while i < n:
         matrix.append([int(x) for x in sys.stdin.readline().split()])
         i += 1
-    print(matrix)
 
-    q = int(sys.stdin.readline()[0])
+    q = int(sys.stdin.readline().split()[0])
 
     hashes = create_hashes(n, m, matrix)
 
+    count = 0
     for i in range(q):
         query = Query(*[int(x) for x in sys.stdin.readline().split()])
-        print(is_sub_matrix_eq(query, hashes))
+        # print()
+        if is_sub_matrix_eq(query, hashes) == 1:
+            count += 1
+
+    print(count)
 
 
 if __name__ == '__main__':
