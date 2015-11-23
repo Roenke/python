@@ -41,9 +41,35 @@ def save(filename, friends):
     file.close()
 
 
+def get_name(user_id):
+    params = {
+        "user_ids": [
+            user_id
+        ]
+    }
+
+    response = requests.get('https://api.vk.com/method/users.get', params=params)
+
+    json = response.json()
+    if 'error' in json:
+        raise Exception(json['error']['error_msg'])
+    if not json['response']:
+        raise Exception('Not valid user id')
+
+    first_name = json['response'][0]['first_name']
+    last_name = json['response'][0]['last_name']
+    return '%s %s' % (first_name, last_name)
+
+
 def pull_friends(user_id):
-    params = {'user_id': user_id,
-              'fields': ['first_name', 'last_name']}
+    params = {
+        'user_id': user_id,
+        'fields': [
+            'first_name',
+            'last_name'
+            ]
+        }
+
     response = requests.get('https://api.vk.com/method/friends.get', params=params)
 
     friends = set()
@@ -60,16 +86,18 @@ def save_mode_execute(user_id):
     actual_friends = pull_friends(user_id)
 
     save('%s.vk' % user_id, actual_friends)
+    print('done')
 
 
 def diff_mode_execute(user_id):
     actual_friends = pull_friends(user_id)
-
+    watch_for = get_name(user_id)
     old_info = load('%s.vk' % user_id)
 
     deleted = old_info.difference(actual_friends)
     added = actual_friends.difference(old_info)
 
+    print('Watch for %s' % watch_for)
     if len(deleted) == 0 and len(added) == 0:
         print('No changes')
     elif len(deleted) != 0:
@@ -88,6 +116,7 @@ def create_parser():
     mode_group.add_argument('-s', '--save', action='store_true')
     mode_group.add_argument('-d', '--diff', action='store_true')
     parser.add_argument('id', type=int)
+
     return parser
 
 
