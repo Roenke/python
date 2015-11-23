@@ -28,17 +28,16 @@ class Friend:
 
 
 def load(filename):
-    os.path.isfile(filename)
-    file = open(filename, 'rb')
-    result = pickle.load(file)
-    file.close()
-    return result
+    with open(filename, 'rb') as file
+        result = pickle.load(file)
+        file.close()
+        return result
 
 
 def save(filename, friends):
-    file = open(filename, 'wb')
-    pickle.dump(friends, file)
-    file.close()
+    with open(filename, 'wb') as file
+        pickle.dump(friends, file)
+        file.close()
 
 
 def get_name(user_id):
@@ -101,13 +100,13 @@ def diff_mode_execute(user_id):
     if len(deleted) == 0 and len(added) == 0:
         print('No changes')
     elif len(deleted) != 0:
-        print('\nDeleted friends:')
+        print('Deleted friends:')
         for deleted_friend in deleted:
             print(deleted_friend)
-        if len(added) != 0:
-            print('New friends:')
-            for new_friend in added:
-                print(new_friend)
+    elif len(added) != 0:
+        print('New friends:')
+        for new_friend in added:
+            print(new_friend)
 
 
 def create_parser():
@@ -121,7 +120,7 @@ def create_parser():
 
 
 def main():
-    argv = sys.argv
+    argv = sys.argv[1:]
     parser = create_parser()
 
     try:

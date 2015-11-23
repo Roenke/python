@@ -23,8 +23,7 @@ class SkipList(object):
         >>> sl.insert(1)
         False
         """
-
-
+        pass
 
     def remove(self, item):
         """
