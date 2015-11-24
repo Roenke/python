@@ -1,11 +1,10 @@
 #! /usr/bin/env python3
 import argparse
 import pickle
-import os
+import sys
 
 import requests
 import requests.exceptions
-import sys
 
 
 class Friend:
@@ -28,16 +27,14 @@ class Friend:
 
 
 def load(filename):
-    with open(filename, 'rb') as file
+    with open(filename, 'rb') as file:
         result = pickle.load(file)
-        file.close()
         return result
 
 
 def save(filename, friends):
-    with open(filename, 'wb') as file
+    with open(filename, 'wb') as file:
         pickle.dump(friends, file)
-        file.close()
 
 
 def get_name(user_id):
@@ -47,7 +44,8 @@ def get_name(user_id):
         ]
     }
 
-    response = requests.get('https://api.vk.com/method/users.get', params=params)
+    response = requests.get('https://api.vk.com/method/users.get',
+                            params=params)
 
     json = response.json()
     if 'error' in json:
@@ -69,7 +67,8 @@ def pull_friends(user_id):
             ]
         }
 
-    response = requests.get('https://api.vk.com/method/friends.get', params=params)
+    response = requests.get('https://api.vk.com/method/friends.get',
+                            params=params)
 
     friends = set()
     json = response.json()

@@ -9,6 +9,10 @@ import pymorphy2
 import sys
 
 
+def key(x):
+    return x[1]
+
+
 def solve(book_name):
     morph = pymorphy2.MorphAnalyzer()
     results = defaultdict(Counter)
@@ -23,7 +27,6 @@ def solve(book_name):
     for pos, words in results.items():
         with open('%s.csv' % pos, 'w', newline='') as csv_file:
             csv_writer = csv.writer(csv_file, delimiter=',')
-            key = lambda x: x[1]
             for word, fr in sorted(words.items(), key=key, reverse=True)[:10]:
                 csv_writer.writerow([word, fr])
 

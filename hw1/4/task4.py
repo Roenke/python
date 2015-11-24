@@ -4,16 +4,24 @@ import random
 
 
 class Node(object):
-    def __init__(self, value, level):
-            self.levels = list([Node] * level)
-            self.value = value
+    def __init__(self, value):
+        levels = 1
+        while random.random() >= 0.5:
+            levels += 1
+        self.levels = [None] * levels
+        self.value = value
 
 
 class SkipList(object):
-
     def __init__(self):
-        self._head = Node(0, 1)
-        self._levels = 1
+        self._head = Node(None)
+        self.__size = 0
+
+    def _find_last_less(self, item, level):
+        node = self._head
+        while node.levels[level] and node.levels[level].elem < item:
+            node = node.levels[level]
+        return node
 
     def insert(self, item):
         """
@@ -23,7 +31,20 @@ class SkipList(object):
         >>> sl.insert(1)
         False
         """
-        pass
+        update = self._path_to_less(item)
+        if self.__size > 0 and update[0].next[0] is not None and \
+                update[0].next[0].elem == item:
+            return False
+        height = self._random_height()
+        new = self._SkipNode(item, height)
+        min_height = min(len(update), height)
+        for level in range(min_height):
+            new.next[level] = update[level].next[level]
+            update[level].next[level] = new
+        self.head.next += [new] * (height - self.head.height())
+        self.__size += 1
+        return True
+
 
     def remove(self, item):
         """
