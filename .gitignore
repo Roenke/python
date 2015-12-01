@@ -5,6 +5,13 @@ __pycache__/
 # C extensions
 *.so
 
+# ipython notebook checkpoints
+*.ipynb_checkpoints
+
+# tests
+*.test.py
+*.test
+
 # Distribution / packaging
 .Python
 env/
