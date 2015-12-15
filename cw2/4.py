@@ -1,22 +1,34 @@
 #! /usr/bin/env python3
 
-decorated_functions = list()
+decorated_functions = dict()
+
+
+def runner(func, *args, **kwargs):
+    found = False
+    for (function, test_func) in decorated_functions[func]:
+        if test_func(*args, **kwargs):
+            return function(*args, **kwargs)
+    if not found:
+        return func(*args, **kwargs)
+
 
 def apply(func, testFunc):
-    func = testFunc(2)
-    def my_decorator(fun):
-        decorated_functions.append((fun, testFunc))
-        def wrapper(*args):
-            found = False
-            for f, test in decorated_functions:
-                if f == func and test(args):
-                    f(args)
-                    found = True
-            if not found:
-                fun(args)
-        return wrapper
+    if "__modified__" not in func.__dict__:
+        def wrapper(*args, **kwargs):
+            return runner(func, *args, **kwargs)
 
-    return my_decorator
+        setattr(wrapper, "__modified__", func)
+        globals()[func.__name__] = wrapper
+    else:
+        func = func.__modified__
+
+    def decorator(f):
+        if func not in decorated_functions:
+            decorated_functions[func] = list()
+        decorated_functions[func].append((f, testFunc))
+        return f
+
+    return decorator
 
 
 def test1(num):
